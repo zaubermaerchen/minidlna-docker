@@ -1,5 +1,6 @@
 FROM zaubermaerchen/ffmpeg AS build
 
+ARG minidlna_version="1.3.0"
 ARG ffmpegthumbnailer_version="2.2.2"
 
 ENV PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
@@ -34,10 +35,14 @@ RUN cd /usr/local/src && \
   make && make install
 
 RUN cd /usr/local/src && \
-  git clone https://github.com/mattn/minidlna-git.git && \
-  cd /usr/local/src/minidlna-git && \
+  wget https://jaist.dl.sourceforge.net/project/minidlna/minidlna/${minidlna_version}/minidlna-${minidlna_version}.tar.gz && \
+  tar xf minidlna-${minidlna_version}.tar.gz && \
+  cd /usr/local/src/minidlna-${minidlna_version} && \
+  wget https://github.com/mattn/minidlna-git/commit/7ffdcadf4be0059895caf17bbc66c87ca5c4b673.patch && \
+  patch < 7ffdcadf4be0059895caf17bbc66c87ca5c4b673.patch && \
   ./autogen.sh && ./configure --enable-thumbnail && \
-  make && make install && make distclean
+  make && make install && make distclean && \
+  cp /usr/local/src/minidlna-${minidlna_version}/minidlna.conf /etc/minidlna.conf
 
 FROM zaubermaerchen/ffmpeg
 
@@ -59,7 +64,7 @@ COPY --from=build /usr/local/share/man/man1/ffmpegthumbnailer.1 /usr/local/share
 COPY --from=build /usr/local/share/thumbnailers/ffmpegthumbnailer.thumbnailer /usr/local/share/thumbnailers/ffmpegthumbnailer.thumbnailer
 
 COPY --from=build /usr/local/sbin/minidlnad /usr/local/sbin/
-COPY --from=build /usr/local/src/minidlna-git/minidlna.conf /etc/minidlna.conf 
+COPY --from=build /etc/minidlna.conf /etc/minidlna.conf 
 COPY --from=build /usr/local/share/locale/da/LC_MESSAGES/minidlna.mo /usr/local/share/locale/da/LC_MESSAGES/minidlna.mo
 COPY --from=build /usr/local/share/locale/de/LC_MESSAGES/minidlna.mo /usr/local/share/locale/de/LC_MESSAGES/minidlna.mo
 COPY --from=build /usr/local/share/locale/es/LC_MESSAGES/minidlna.mo /usr/local/share/locale/es/LC_MESSAGES/minidlna.mo

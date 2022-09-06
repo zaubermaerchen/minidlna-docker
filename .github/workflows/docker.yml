@@ -22,7 +22,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: zaubermaerchen/ffmpeg
+          images: zaubermaerchen/minidlna
           tags: |
             type=ref,event=branch
             type=ref,event=pr

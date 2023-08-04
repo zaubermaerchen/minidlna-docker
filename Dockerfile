@@ -2,7 +2,7 @@ FROM zaubermaerchen/ffmpeg:4.4 AS build
 
 COPY thumbnail_creation.patch /tmp/
 
-ARG minidlna_version="1.3.2"
+ARG minidlna_version="1.3.3"
 ARG ffmpegthumbnailer_version="2.2.2"
 
 RUN apk add --update \
